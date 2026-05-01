@@ -26,7 +26,21 @@ Authentication uses the Databricks SDK's standard credential chain, which auto-d
 
 ## Installation
 
-### From source
+### Quick install (no Go required)
+
+```bash
+curl -sfL https://raw.githubusercontent.com/BrianDeacon/databricks-utils-mcp-go/main/install.sh | sh
+```
+
+This downloads the latest prebuilt binary for your platform and installs it to `/usr/local/bin`. Customize with environment variables:
+
+```bash
+VERSION=v0.0.1 INSTALL_DIR=~/.local/bin curl -sfL https://raw.githubusercontent.com/BrianDeacon/databricks-utils-mcp-go/main/install.sh | sh
+```
+
+Prebuilt binaries are also available on the [releases page](https://github.com/BrianDeacon/databricks-utils-mcp-go/releases).
+
+### From source (requires Go)
 
 ```bash
 go install github.com/BrianDeacon/databricks-utils-mcp-go/cmd/databricks-utils-mcp@latest
