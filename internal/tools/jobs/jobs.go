@@ -4,16 +4,18 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net/http"
 	"sort"
 
+	"github.com/databricks/databricks-sdk-go/httpclient"
 	"github.com/databricks/databricks-sdk-go/service/jobs"
 
 	"github.com/BrianDeacon/databricks-utils-mcp-go/internal/client"
 )
 
-func ListJobs(ctx context.Context, name *string, maxResults int, host, profile, tokenEnvVar *string) string {
-	if maxResults <= 0 {
-		maxResults = 25
+func ListJobs(ctx context.Context, name *string, pageSize int, pageToken *string, host, profile, tokenEnvVar *string) string {
+	if pageSize <= 0 {
+		pageSize = 25
 	}
 
 	w, err := client.GetClient(host, profile, tokenEnvVar)
@@ -21,12 +23,24 @@ func ListJobs(ctx context.Context, name *string, maxResults int, host, profile, 
 		return fmt.Sprintf("Error: %v", err)
 	}
 
-	req := jobs.ListJobsRequest{Limit: maxResults}
+	req := jobs.ListJobsRequest{Limit: pageSize}
 	if name != nil && *name != "" {
 		req.Name = *name
 	}
+	if pageToken != nil && *pageToken != "" {
+		req.PageToken = *pageToken
+	}
 
-	all, err := w.Jobs.ListAll(ctx, req)
+	apiClient, err := w.Config.NewApiClient()
+	if err != nil {
+		return fmt.Sprintf("Error creating API client: %v", err)
+	}
+
+	var resp jobs.ListJobsResponse
+	err = apiClient.Do(ctx, http.MethodGet, "/api/2.2/jobs/list",
+		httpclient.WithRequestData(req),
+		httpclient.WithResponseUnmarshal(&resp),
+	)
 	if err != nil {
 		return fmt.Sprintf("Error listing jobs: %v", err)
 	}
@@ -36,24 +50,29 @@ func ListJobs(ctx context.Context, name *string, maxResults int, host, profile, 
 		Name        string `json:"name"`
 		CreatorName string `json:"creator_user_name,omitempty"`
 	}
-	var result []jobInfo
-	for _, j := range all {
-		info := jobInfo{JobID: j.JobId}
+	var jobList []jobInfo
+	for _, j := range resp.Jobs {
+		info := jobInfo{JobID: j.JobId, CreatorName: j.CreatorUserName}
 		if j.Settings != nil {
 			info.Name = j.Settings.Name
 		}
-		info.CreatorName = j.CreatorUserName
-		result = append(result, info)
-		if len(result) >= maxResults {
-			break
-		}
+		jobList = append(jobList, info)
 	}
 
-	if len(result) == 0 {
+	if len(jobList) == 0 {
 		return "No jobs found."
 	}
 
-	sort.Slice(result, func(i, j int) bool { return result[i].Name < result[j].Name })
+	sort.Slice(jobList, func(i, j int) bool { return jobList[i].Name < jobList[j].Name })
+
+	result := map[string]any{
+		"jobs": jobList,
+	}
+	if resp.HasMore {
+		result["has_more"] = true
+		result["next_page_token"] = resp.NextPageToken
+	}
+
 	out, _ := json.MarshalIndent(result, "", "  ")
 	return string(out)
 }
@@ -104,9 +123,9 @@ func GetJob(ctx context.Context, jobID int64, host, profile, tokenEnvVar *string
 	return string(out)
 }
 
-func ListJobRuns(ctx context.Context, jobID *int64, activeOnly bool, maxResults int, host, profile, tokenEnvVar *string) string {
-	if maxResults <= 0 {
-		maxResults = 25
+func ListJobRuns(ctx context.Context, jobID *int64, activeOnly bool, pageSize int, pageToken *string, host, profile, tokenEnvVar *string) string {
+	if pageSize <= 0 {
+		pageSize = 25
 	}
 
 	w, err := client.GetClient(host, profile, tokenEnvVar)
@@ -114,15 +133,27 @@ func ListJobRuns(ctx context.Context, jobID *int64, activeOnly bool, maxResults 
 		return fmt.Sprintf("Error: %v", err)
 	}
 
-	req := jobs.ListRunsRequest{Limit: maxResults}
+	req := jobs.ListRunsRequest{Limit: pageSize}
 	if jobID != nil {
 		req.JobId = *jobID
 	}
 	if activeOnly {
 		req.ActiveOnly = true
 	}
+	if pageToken != nil && *pageToken != "" {
+		req.PageToken = *pageToken
+	}
 
-	all, err := w.Jobs.ListRunsAll(ctx, req)
+	apiClient, err := w.Config.NewApiClient()
+	if err != nil {
+		return fmt.Sprintf("Error creating API client: %v", err)
+	}
+
+	var resp jobs.ListRunsResponse
+	err = apiClient.Do(ctx, http.MethodGet, "/api/2.2/jobs/runs/list",
+		httpclient.WithRequestData(req),
+		httpclient.WithResponseUnmarshal(&resp),
+	)
 	if err != nil {
 		return fmt.Sprintf("Error listing job runs: %v", err)
 	}
@@ -135,8 +166,8 @@ func ListJobRuns(ctx context.Context, jobID *int64, activeOnly bool, maxResults 
 		Duration  int64  `json:"duration_ms,omitempty"`
 		Trigger   string `json:"trigger,omitempty"`
 	}
-	var result []runInfo
-	for _, r := range all {
+	var runList []runInfo
+	for _, r := range resp.Runs {
 		info := runInfo{
 			RunID:     r.RunId,
 			StartTime: r.StartTime,
@@ -149,14 +180,19 @@ func ListJobRuns(ctx context.Context, jobID *int64, activeOnly bool, maxResults 
 		if r.State != nil {
 			info.State = string(r.State.LifeCycleState)
 		}
-		result = append(result, info)
-		if len(result) >= maxResults {
-			break
-		}
+		runList = append(runList, info)
 	}
 
-	if len(result) == 0 {
+	if len(runList) == 0 {
 		return "No runs found."
+	}
+
+	result := map[string]any{
+		"runs": runList,
+	}
+	if resp.HasMore {
+		result["has_more"] = true
+		result["next_page_token"] = resp.NextPageToken
 	}
 
 	out, _ := json.MarshalIndent(result, "", "  ")

@@ -521,21 +521,23 @@ func registerQueryHistoryTools(s *server.MCPServer) {
 func registerJobsTools(s *server.MCPServer) {
 	s.AddTool(
 		mcp.NewTool("jobs_list", toolOpts(
-			"List jobs in the workspace.\n\n"+
-				"Returns a JSON array with job_id, name, and creator.\n\n"+
+			"List jobs in the workspace. Results are paged (default 25 per page).\n\n"+
 				"name: Filter by job name (substring match).\n"+
-				"max_results: Max results (default 25).\n"+
+				"page_size: Number of jobs per page (default 25).\n"+
+				"page_token: Token from a previous response to fetch the next/previous page.\n"+
 				"host: Databricks workspace URL. Overrides the default from env/config.\n"+
 				"profile: Name of a ~/.databrickscfg profile to use.\n"+
 				"token_env_var: Name of an environment variable containing the access token.",
 			mcp.WithString("name", mcp.Description("Filter by job name (substring match).")),
-			mcp.WithInteger("max_results", mcp.Description("Max results (default 25).")),
+			mcp.WithInteger("page_size", mcp.Description("Number of jobs per page (default 25).")),
+			mcp.WithString("page_token", mcp.Description("Token from a previous response to fetch the next/previous page.")),
 		)...),
 		func(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 			args := req.GetArguments()
 			return textResult(jobs.ListJobs(ctx, 
 				getOptionalString(args, "name"),
-				getInt(args, "max_results", 25),
+				getInt(args, "page_size", 25),
+				getOptionalString(args, "page_token"),
 				getOptionalString(args, "host"),
 				getOptionalString(args, "profile"),
 				getOptionalString(args, "token_env_var"),
@@ -566,17 +568,19 @@ func registerJobsTools(s *server.MCPServer) {
 
 	s.AddTool(
 		mcp.NewTool("jobs_list_runs", toolOpts(
-			"List job runs.\n\n"+
-				"Returns a JSON array with run_id, state, start/end times, duration, and trigger.\n\n"+
+			"List job runs. Results are paged (default 25 per page).\n\n"+
+				"Returns a JSON object with runs array, and pagination metadata.\n\n"+
 				"job_id: Filter to a specific job.\n"+
 				"active_only: Only show active (in-progress) runs.\n"+
-				"max_results: Max results (default 25).\n"+
+				"page_size: Number of runs per page (default 25).\n"+
+				"page_token: Token from a previous response to fetch the next/previous page.\n"+
 				"host: Databricks workspace URL. Overrides the default from env/config.\n"+
 				"profile: Name of a ~/.databrickscfg profile to use.\n"+
 				"token_env_var: Name of an environment variable containing the access token.",
 			mcp.WithInteger("job_id", mcp.Description("Filter to a specific job.")),
 			mcp.WithBoolean("active_only", mcp.Description("Only show active (in-progress) runs.")),
-			mcp.WithInteger("max_results", mcp.Description("Max results (default 25).")),
+			mcp.WithInteger("page_size", mcp.Description("Number of runs per page (default 25).")),
+			mcp.WithString("page_token", mcp.Description("Token from a previous response to fetch the next/previous page.")),
 		)...),
 		func(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 			args := req.GetArguments()
@@ -588,7 +592,8 @@ func registerJobsTools(s *server.MCPServer) {
 			return textResult(jobs.ListJobRuns(ctx, 
 				jobID,
 				getBool(args, "active_only", false),
-				getInt(args, "max_results", 25),
+				getInt(args, "page_size", 25),
+				getOptionalString(args, "page_token"),
 				getOptionalString(args, "host"),
 				getOptionalString(args, "profile"),
 				getOptionalString(args, "token_env_var"),

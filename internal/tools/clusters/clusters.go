@@ -4,8 +4,10 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net/http"
 	"sort"
 
+	"github.com/databricks/databricks-sdk-go/httpclient"
 	"github.com/databricks/databricks-sdk-go/service/compute"
 
 	"github.com/BrianDeacon/databricks-utils-mcp-go/internal/client"
@@ -21,7 +23,7 @@ func ListClusters(ctx context.Context, clusterSources, clusterStates *string, is
 		return fmt.Sprintf("Error: %v", err)
 	}
 
-	req := compute.ListClustersRequest{}
+	req := compute.ListClustersRequest{PageSize: pageSize}
 	if pageToken != nil && *pageToken != "" {
 		req.PageToken = *pageToken
 	}
@@ -31,7 +33,16 @@ func ListClusters(ctx context.Context, clusterSources, clusterStates *string, is
 		}
 	}
 
-	all, err := w.Clusters.ListAll(ctx, req)
+	apiClient, err := w.Config.NewApiClient()
+	if err != nil {
+		return fmt.Sprintf("Error creating API client: %v", err)
+	}
+
+	var resp compute.ListClustersResponse
+	err = apiClient.Do(ctx, http.MethodGet, "/api/2.1/clusters/list",
+		httpclient.WithRequestData(req),
+		httpclient.WithResponseUnmarshal(&resp),
+	)
 	if err != nil {
 		return fmt.Sprintf("Error listing clusters: %v", err)
 	}
@@ -42,24 +53,29 @@ func ListClusters(ctx context.Context, clusterSources, clusterStates *string, is
 		State       string `json:"state"`
 		Creator     string `json:"creator,omitempty"`
 	}
-	var result []clusterInfo
-	for _, c := range all {
-		result = append(result, clusterInfo{
+	var clusterList []clusterInfo
+	for _, c := range resp.Clusters {
+		clusterList = append(clusterList, clusterInfo{
 			ClusterID:   c.ClusterId,
 			ClusterName: c.ClusterName,
 			State:       string(c.State),
 			Creator:     c.CreatorUserName,
 		})
-		if len(result) >= pageSize {
-			break
-		}
 	}
 
-	if len(result) == 0 {
+	if len(clusterList) == 0 {
 		return "No clusters found."
 	}
 
-	sort.Slice(result, func(i, j int) bool { return result[i].ClusterName < result[j].ClusterName })
+	sort.Slice(clusterList, func(i, j int) bool { return clusterList[i].ClusterName < clusterList[j].ClusterName })
+
+	result := map[string]any{
+		"clusters": clusterList,
+	}
+	if resp.NextPageToken != "" {
+		result["next_page_token"] = resp.NextPageToken
+	}
+
 	out, _ := json.MarshalIndent(result, "", "  ")
 	return string(out)
 }
