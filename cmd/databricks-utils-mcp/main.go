@@ -696,7 +696,7 @@ func registerJobsTools(s *server.MCPServer) {
 				"config_profile: Name of a ~/.databrickscfg profile to use.\n"+
 				"token_env_var: Name of an environment variable containing the access token.",
 			mcp.WithInteger("run_id", mcp.Required(), mcp.Description("Run ID of a failed multi-task job.")),
-			mcp.WithArray("rerun_tasks", mcp.Description("Specific task keys to re-run. If omitted, re-runs all failed tasks.")),
+			mcp.WithArray("rerun_tasks", mcp.Description("Specific task keys to re-run. If omitted, re-runs all failed tasks."), mcp.WithStringItems()),
 		)...),
 		func(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 			args := req.GetArguments()
