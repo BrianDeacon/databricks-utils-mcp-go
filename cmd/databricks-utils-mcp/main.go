@@ -49,7 +49,7 @@ func main() {
 func authParams() []mcp.ToolOption {
 	return []mcp.ToolOption{
 		mcp.WithString("host", mcp.Description("Databricks workspace URL. Overrides the default from env/config.")),
-		mcp.WithString("profile", mcp.Description("Name of a ~/.databrickscfg profile to use.")),
+		mcp.WithString("config_profile", mcp.Description("Name of a ~/.databrickscfg profile to use.")),
 		mcp.WithString("token_env_var", mcp.Description("Name of an environment variable containing the access token.")),
 	}
 }
@@ -167,14 +167,14 @@ func registerCatalogTools(s *server.MCPServer) {
 			"List all Unity Catalog catalogs accessible to the current user.\n\n"+
 				"Returns a sorted JSON array of catalog names.\n\n"+
 				"host: Databricks workspace URL. Overrides the default from env/config.\n"+
-				"profile: Name of a ~/.databrickscfg profile to use.\n"+
+				"config_profile: Name of a ~/.databrickscfg profile to use.\n"+
 				"token_env_var: Name of an environment variable containing the access token.",
 		)...),
 		func(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 			args := req.GetArguments()
 			return textResult(catalog.ListCatalogs(ctx, 
 				getOptionalString(args, "host"),
-				getOptionalString(args, "profile"),
+				getOptionalString(args, "config_profile"),
 				getOptionalString(args, "token_env_var"),
 			)), nil
 		},
@@ -186,7 +186,7 @@ func registerCatalogTools(s *server.MCPServer) {
 				"Returns a sorted JSON array of schema names.\n\n"+
 				"catalog: Catalog name.\n"+
 				"host: Databricks workspace URL. Overrides the default from env/config.\n"+
-				"profile: Name of a ~/.databrickscfg profile to use.\n"+
+				"config_profile: Name of a ~/.databrickscfg profile to use.\n"+
 				"token_env_var: Name of an environment variable containing the access token.",
 			mcp.WithString("catalog", mcp.Required(), mcp.Description("Catalog name.")),
 		)...),
@@ -195,7 +195,7 @@ func registerCatalogTools(s *server.MCPServer) {
 			return textResult(catalog.ListSchemas(ctx, 
 				getRequiredString(args, "catalog"),
 				getOptionalString(args, "host"),
-				getOptionalString(args, "profile"),
+				getOptionalString(args, "config_profile"),
 				getOptionalString(args, "token_env_var"),
 			)), nil
 		},
@@ -208,7 +208,7 @@ func registerCatalogTools(s *server.MCPServer) {
 				"catalog: Catalog name.\n"+
 				"schema: Schema name.\n"+
 				"host: Databricks workspace URL. Overrides the default from env/config.\n"+
-				"profile: Name of a ~/.databrickscfg profile to use.\n"+
+				"config_profile: Name of a ~/.databrickscfg profile to use.\n"+
 				"token_env_var: Name of an environment variable containing the access token.",
 			mcp.WithString("catalog", mcp.Required(), mcp.Description("Catalog name.")),
 			mcp.WithString("schema", mcp.Required(), mcp.Description("Schema name.")),
@@ -219,7 +219,7 @@ func registerCatalogTools(s *server.MCPServer) {
 				getRequiredString(args, "catalog"),
 				getRequiredString(args, "schema"),
 				getOptionalString(args, "host"),
-				getOptionalString(args, "profile"),
+				getOptionalString(args, "config_profile"),
 				getOptionalString(args, "token_env_var"),
 			)), nil
 		},
@@ -232,7 +232,7 @@ func registerCatalogTools(s *server.MCPServer) {
 				"properties, and timestamps.\n\n"+
 				"full_name: Three-part name: catalog.schema.table.\n"+
 				"host: Databricks workspace URL. Overrides the default from env/config.\n"+
-				"profile: Name of a ~/.databrickscfg profile to use.\n"+
+				"config_profile: Name of a ~/.databrickscfg profile to use.\n"+
 				"token_env_var: Name of an environment variable containing the access token.",
 			mcp.WithString("full_name", mcp.Required(), mcp.Description("Three-part name: catalog.schema.table.")),
 		)...),
@@ -241,7 +241,7 @@ func registerCatalogTools(s *server.MCPServer) {
 			return textResult(catalog.DescribeTable(ctx, 
 				getRequiredString(args, "full_name"),
 				getOptionalString(args, "host"),
-				getOptionalString(args, "profile"),
+				getOptionalString(args, "config_profile"),
 				getOptionalString(args, "token_env_var"),
 			)), nil
 		},
@@ -256,7 +256,7 @@ func registerCatalogTools(s *server.MCPServer) {
 				"limit: Number of rows (default 10, max 100).\n"+
 				"warehouse_id: SQL warehouse to use. If omitted, uses the first running warehouse.\n"+
 				"host: Databricks workspace URL. Overrides the default from env/config.\n"+
-				"profile: Name of a ~/.databrickscfg profile to use.\n"+
+				"config_profile: Name of a ~/.databrickscfg profile to use.\n"+
 				"token_env_var: Name of an environment variable containing the access token.",
 			mcp.WithString("full_name", mcp.Required(), mcp.Description("Three-part name: catalog.schema.table.")),
 			mcp.WithInteger("limit", mcp.Description("Number of rows (default 10, max 100).")),
@@ -269,7 +269,7 @@ func registerCatalogTools(s *server.MCPServer) {
 				getInt(args, "limit", 10),
 				getOptionalString(args, "warehouse_id"),
 				getOptionalString(args, "host"),
-				getOptionalString(args, "profile"),
+				getOptionalString(args, "config_profile"),
 				getOptionalString(args, "token_env_var"),
 			)), nil
 		},
@@ -282,7 +282,7 @@ func registerCatalogTools(s *server.MCPServer) {
 				"catalog: Catalog name.\n"+
 				"schema: Schema name.\n"+
 				"host: Databricks workspace URL. Overrides the default from env/config.\n"+
-				"profile: Name of a ~/.databrickscfg profile to use.\n"+
+				"config_profile: Name of a ~/.databrickscfg profile to use.\n"+
 				"token_env_var: Name of an environment variable containing the access token.",
 			mcp.WithString("catalog", mcp.Required(), mcp.Description("Catalog name.")),
 			mcp.WithString("schema", mcp.Required(), mcp.Description("Schema name.")),
@@ -293,7 +293,7 @@ func registerCatalogTools(s *server.MCPServer) {
 				getRequiredString(args, "catalog"),
 				getRequiredString(args, "schema"),
 				getOptionalString(args, "host"),
-				getOptionalString(args, "profile"),
+				getOptionalString(args, "config_profile"),
 				getOptionalString(args, "token_env_var"),
 			)), nil
 		},
@@ -305,7 +305,7 @@ func registerCatalogTools(s *server.MCPServer) {
 				"Returns a JSON array of entries with name, path, size, and modification time.\n\n"+
 				"volume_path: Path under /Volumes/catalog/schema/volume/.\n"+
 				"host: Databricks workspace URL. Overrides the default from env/config.\n"+
-				"profile: Name of a ~/.databrickscfg profile to use.\n"+
+				"config_profile: Name of a ~/.databrickscfg profile to use.\n"+
 				"token_env_var: Name of an environment variable containing the access token.",
 			mcp.WithString("volume_path", mcp.Required(), mcp.Description("Path under /Volumes/catalog/schema/volume/.")),
 		)...),
@@ -314,7 +314,7 @@ func registerCatalogTools(s *server.MCPServer) {
 			return textResult(catalog.ListVolumeFiles(ctx, 
 				getRequiredString(args, "volume_path"),
 				getOptionalString(args, "host"),
-				getOptionalString(args, "profile"),
+				getOptionalString(args, "config_profile"),
 				getOptionalString(args, "token_env_var"),
 			)), nil
 		},
@@ -327,7 +327,7 @@ func registerCatalogTools(s *server.MCPServer) {
 				"catalog: Catalog name.\n"+
 				"schema: Schema name.\n"+
 				"host: Databricks workspace URL. Overrides the default from env/config.\n"+
-				"profile: Name of a ~/.databrickscfg profile to use.\n"+
+				"config_profile: Name of a ~/.databrickscfg profile to use.\n"+
 				"token_env_var: Name of an environment variable containing the access token.",
 			mcp.WithString("catalog", mcp.Required(), mcp.Description("Catalog name.")),
 			mcp.WithString("schema", mcp.Required(), mcp.Description("Schema name.")),
@@ -338,7 +338,7 @@ func registerCatalogTools(s *server.MCPServer) {
 				getRequiredString(args, "catalog"),
 				getRequiredString(args, "schema"),
 				getOptionalString(args, "host"),
-				getOptionalString(args, "profile"),
+				getOptionalString(args, "config_profile"),
 				getOptionalString(args, "token_env_var"),
 			)), nil
 		},
@@ -358,7 +358,7 @@ func registerSQLTools(s *server.MCPServer) {
 				"catalog: Default catalog for unqualified names.\n"+
 				"schema: Default schema for unqualified names.\n"+
 				"host: Databricks workspace URL. Overrides the default from env/config.\n"+
-				"profile: Name of a ~/.databrickscfg profile to use.\n"+
+				"config_profile: Name of a ~/.databrickscfg profile to use.\n"+
 				"token_env_var: Name of an environment variable containing the access token.",
 			mcp.WithString("statement", mcp.Required(), mcp.Description("SQL statement to execute.")),
 			mcp.WithString("warehouse_id", mcp.Description("SQL warehouse ID. If omitted, uses the first running warehouse.")),
@@ -375,7 +375,7 @@ func registerSQLTools(s *server.MCPServer) {
 				getOptionalString(args, "catalog"),
 				getOptionalString(args, "schema"),
 				getOptionalString(args, "host"),
-				getOptionalString(args, "profile"),
+				getOptionalString(args, "config_profile"),
 				getOptionalString(args, "token_env_var"),
 			)), nil
 		},
@@ -386,14 +386,14 @@ func registerSQLTools(s *server.MCPServer) {
 			"List all SQL warehouses in the workspace.\n\n"+
 				"Returns a JSON array with id, name, state, cluster_size, and auto_stop_mins.\n\n"+
 				"host: Databricks workspace URL. Overrides the default from env/config.\n"+
-				"profile: Name of a ~/.databrickscfg profile to use.\n"+
+				"config_profile: Name of a ~/.databrickscfg profile to use.\n"+
 				"token_env_var: Name of an environment variable containing the access token.",
 		)...),
 		func(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 			args := req.GetArguments()
 			return textResult(sqlt.ListWarehouses(ctx, 
 				getOptionalString(args, "host"),
-				getOptionalString(args, "profile"),
+				getOptionalString(args, "config_profile"),
 				getOptionalString(args, "token_env_var"),
 			)), nil
 		},
@@ -404,7 +404,7 @@ func registerSQLTools(s *server.MCPServer) {
 			"Get full configuration details for a SQL warehouse.\n\n"+
 				"warehouse_id: SQL warehouse ID.\n"+
 				"host: Databricks workspace URL. Overrides the default from env/config.\n"+
-				"profile: Name of a ~/.databrickscfg profile to use.\n"+
+				"config_profile: Name of a ~/.databrickscfg profile to use.\n"+
 				"token_env_var: Name of an environment variable containing the access token.",
 			mcp.WithString("warehouse_id", mcp.Required(), mcp.Description("SQL warehouse ID.")),
 		)...),
@@ -413,7 +413,7 @@ func registerSQLTools(s *server.MCPServer) {
 			return textResult(sqlt.GetWarehouse(ctx, 
 				getRequiredString(args, "warehouse_id"),
 				getOptionalString(args, "host"),
-				getOptionalString(args, "profile"),
+				getOptionalString(args, "config_profile"),
 				getOptionalString(args, "token_env_var"),
 			)), nil
 		},
@@ -424,7 +424,7 @@ func registerSQLTools(s *server.MCPServer) {
 			"Start a stopped SQL warehouse. Does not wait for it to finish starting.\n\n"+
 				"warehouse_id: SQL warehouse ID.\n"+
 				"host: Databricks workspace URL. Overrides the default from env/config.\n"+
-				"profile: Name of a ~/.databrickscfg profile to use.\n"+
+				"config_profile: Name of a ~/.databrickscfg profile to use.\n"+
 				"token_env_var: Name of an environment variable containing the access token.",
 			mcp.WithString("warehouse_id", mcp.Required(), mcp.Description("SQL warehouse ID.")),
 		)...),
@@ -433,7 +433,7 @@ func registerSQLTools(s *server.MCPServer) {
 			return textResult(sqlt.StartWarehouse(ctx, 
 				getRequiredString(args, "warehouse_id"),
 				getOptionalString(args, "host"),
-				getOptionalString(args, "profile"),
+				getOptionalString(args, "config_profile"),
 				getOptionalString(args, "token_env_var"),
 			)), nil
 		},
@@ -444,7 +444,7 @@ func registerSQLTools(s *server.MCPServer) {
 			"Stop a running SQL warehouse.\n\n"+
 				"warehouse_id: SQL warehouse ID.\n"+
 				"host: Databricks workspace URL. Overrides the default from env/config.\n"+
-				"profile: Name of a ~/.databrickscfg profile to use.\n"+
+				"config_profile: Name of a ~/.databrickscfg profile to use.\n"+
 				"token_env_var: Name of an environment variable containing the access token.",
 			mcp.WithString("warehouse_id", mcp.Required(), mcp.Description("SQL warehouse ID.")),
 		)...),
@@ -453,7 +453,7 @@ func registerSQLTools(s *server.MCPServer) {
 			return textResult(sqlt.StopWarehouse(ctx, 
 				getRequiredString(args, "warehouse_id"),
 				getOptionalString(args, "host"),
-				getOptionalString(args, "profile"),
+				getOptionalString(args, "config_profile"),
 				getOptionalString(args, "token_env_var"),
 			)), nil
 		},
@@ -473,7 +473,7 @@ func registerQueryHistoryTools(s *server.MCPServer) {
 				"status: Filter by status (FINISHED, FAILED, CANCELED, RUNNING).\n"+
 				"max_results: Max results (default 25, max 100).\n"+
 				"host: Databricks workspace URL. Overrides the default from env/config.\n"+
-				"profile: Name of a ~/.databrickscfg profile to use.\n"+
+				"config_profile: Name of a ~/.databrickscfg profile to use.\n"+
 				"token_env_var: Name of an environment variable containing the access token.",
 			mcp.WithString("warehouse_id", mcp.Description("Filter to a specific warehouse.")),
 			mcp.WithString("user_name", mcp.Description("Filter by user.")),
@@ -488,7 +488,7 @@ func registerQueryHistoryTools(s *server.MCPServer) {
 				getOptionalString(args, "status"),
 				getInt(args, "max_results", 25),
 				getOptionalString(args, "host"),
-				getOptionalString(args, "profile"),
+				getOptionalString(args, "config_profile"),
 				getOptionalString(args, "token_env_var"),
 			)), nil
 		},
@@ -500,7 +500,7 @@ func registerQueryHistoryTools(s *server.MCPServer) {
 				"Returns the complete statement text, metrics, and error message if failed.\n\n"+
 				"query_id: Query ID.\n"+
 				"host: Databricks workspace URL. Overrides the default from env/config.\n"+
-				"profile: Name of a ~/.databrickscfg profile to use.\n"+
+				"config_profile: Name of a ~/.databrickscfg profile to use.\n"+
 				"token_env_var: Name of an environment variable containing the access token.",
 			mcp.WithString("query_id", mcp.Required(), mcp.Description("Query ID.")),
 		)...),
@@ -509,7 +509,7 @@ func registerQueryHistoryTools(s *server.MCPServer) {
 			return textResult(queryhistory.GetQuery(ctx, 
 				getRequiredString(args, "query_id"),
 				getOptionalString(args, "host"),
-				getOptionalString(args, "profile"),
+				getOptionalString(args, "config_profile"),
 				getOptionalString(args, "token_env_var"),
 			)), nil
 		},
@@ -526,7 +526,7 @@ func registerJobsTools(s *server.MCPServer) {
 				"page_size: Number of jobs per page (default 25).\n"+
 				"page_token: Token from a previous response to fetch the next/previous page.\n"+
 				"host: Databricks workspace URL. Overrides the default from env/config.\n"+
-				"profile: Name of a ~/.databrickscfg profile to use.\n"+
+				"config_profile: Name of a ~/.databrickscfg profile to use.\n"+
 				"token_env_var: Name of an environment variable containing the access token.",
 			mcp.WithString("name", mcp.Description("Filter by job name (substring match).")),
 			mcp.WithInteger("page_size", mcp.Description("Number of jobs per page (default 25).")),
@@ -539,7 +539,7 @@ func registerJobsTools(s *server.MCPServer) {
 				getInt(args, "page_size", 25),
 				getOptionalString(args, "page_token"),
 				getOptionalString(args, "host"),
-				getOptionalString(args, "profile"),
+				getOptionalString(args, "config_profile"),
 				getOptionalString(args, "token_env_var"),
 			)), nil
 		},
@@ -551,7 +551,7 @@ func registerJobsTools(s *server.MCPServer) {
 				"Returns tasks, schedule, clusters, parameters, tags, and notifications.\n\n"+
 				"job_id: Job ID.\n"+
 				"host: Databricks workspace URL. Overrides the default from env/config.\n"+
-				"profile: Name of a ~/.databrickscfg profile to use.\n"+
+				"config_profile: Name of a ~/.databrickscfg profile to use.\n"+
 				"token_env_var: Name of an environment variable containing the access token.",
 			mcp.WithInteger("job_id", mcp.Required(), mcp.Description("Job ID.")),
 		)...),
@@ -560,7 +560,7 @@ func registerJobsTools(s *server.MCPServer) {
 			return textResult(jobs.GetJob(ctx, 
 				int64(getInt(args, "job_id", 0)),
 				getOptionalString(args, "host"),
-				getOptionalString(args, "profile"),
+				getOptionalString(args, "config_profile"),
 				getOptionalString(args, "token_env_var"),
 			)), nil
 		},
@@ -575,7 +575,7 @@ func registerJobsTools(s *server.MCPServer) {
 				"page_size: Number of runs per page (default 25).\n"+
 				"page_token: Token from a previous response to fetch the next/previous page.\n"+
 				"host: Databricks workspace URL. Overrides the default from env/config.\n"+
-				"profile: Name of a ~/.databrickscfg profile to use.\n"+
+				"config_profile: Name of a ~/.databrickscfg profile to use.\n"+
 				"token_env_var: Name of an environment variable containing the access token.",
 			mcp.WithInteger("job_id", mcp.Description("Filter to a specific job.")),
 			mcp.WithBoolean("active_only", mcp.Description("Only show active (in-progress) runs.")),
@@ -595,7 +595,7 @@ func registerJobsTools(s *server.MCPServer) {
 				getInt(args, "page_size", 25),
 				getOptionalString(args, "page_token"),
 				getOptionalString(args, "host"),
-				getOptionalString(args, "profile"),
+				getOptionalString(args, "config_profile"),
 				getOptionalString(args, "token_env_var"),
 			)), nil
 		},
@@ -608,7 +608,7 @@ func registerJobsTools(s *server.MCPServer) {
 				"and attempt number.\n\n"+
 				"run_id: Run ID.\n"+
 				"host: Databricks workspace URL. Overrides the default from env/config.\n"+
-				"profile: Name of a ~/.databrickscfg profile to use.\n"+
+				"config_profile: Name of a ~/.databrickscfg profile to use.\n"+
 				"token_env_var: Name of an environment variable containing the access token.",
 			mcp.WithInteger("run_id", mcp.Required(), mcp.Description("Run ID.")),
 		)...),
@@ -617,7 +617,7 @@ func registerJobsTools(s *server.MCPServer) {
 			return textResult(jobs.GetJobRun(ctx, 
 				int64(getInt(args, "run_id", 0)),
 				getOptionalString(args, "host"),
-				getOptionalString(args, "profile"),
+				getOptionalString(args, "config_profile"),
 				getOptionalString(args, "token_env_var"),
 			)), nil
 		},
@@ -629,7 +629,7 @@ func registerJobsTools(s *server.MCPServer) {
 				"Returns notebook output, error trace, and logs depending on task type.\n\n"+
 				"run_id: Run ID.\n"+
 				"host: Databricks workspace URL. Overrides the default from env/config.\n"+
-				"profile: Name of a ~/.databrickscfg profile to use.\n"+
+				"config_profile: Name of a ~/.databrickscfg profile to use.\n"+
 				"token_env_var: Name of an environment variable containing the access token.",
 			mcp.WithInteger("run_id", mcp.Required(), mcp.Description("Run ID.")),
 		)...),
@@ -638,7 +638,7 @@ func registerJobsTools(s *server.MCPServer) {
 			return textResult(jobs.GetRunOutput(ctx, 
 				int64(getInt(args, "run_id", 0)),
 				getOptionalString(args, "host"),
-				getOptionalString(args, "profile"),
+				getOptionalString(args, "config_profile"),
 				getOptionalString(args, "token_env_var"),
 			)), nil
 		},
@@ -651,7 +651,7 @@ func registerJobsTools(s *server.MCPServer) {
 				"job_id: Job ID.\n"+
 				"parameters: Optional parameter overrides as key/value map.\n"+
 				"host: Databricks workspace URL. Overrides the default from env/config.\n"+
-				"profile: Name of a ~/.databrickscfg profile to use.\n"+
+				"config_profile: Name of a ~/.databrickscfg profile to use.\n"+
 				"token_env_var: Name of an environment variable containing the access token.",
 			mcp.WithInteger("job_id", mcp.Required(), mcp.Description("Job ID.")),
 		)...),
@@ -661,7 +661,7 @@ func registerJobsTools(s *server.MCPServer) {
 				int64(getInt(args, "job_id", 0)),
 				getStringMap(args, "parameters"),
 				getOptionalString(args, "host"),
-				getOptionalString(args, "profile"),
+				getOptionalString(args, "config_profile"),
 				getOptionalString(args, "token_env_var"),
 			)), nil
 		},
@@ -672,7 +672,7 @@ func registerJobsTools(s *server.MCPServer) {
 			"Cancel an in-progress job run.\n\n"+
 				"run_id: Run ID.\n"+
 				"host: Databricks workspace URL. Overrides the default from env/config.\n"+
-				"profile: Name of a ~/.databrickscfg profile to use.\n"+
+				"config_profile: Name of a ~/.databrickscfg profile to use.\n"+
 				"token_env_var: Name of an environment variable containing the access token.",
 			mcp.WithInteger("run_id", mcp.Required(), mcp.Description("Run ID.")),
 		)...),
@@ -681,7 +681,7 @@ func registerJobsTools(s *server.MCPServer) {
 			return textResult(jobs.CancelRun(ctx, 
 				int64(getInt(args, "run_id", 0)),
 				getOptionalString(args, "host"),
-				getOptionalString(args, "profile"),
+				getOptionalString(args, "config_profile"),
 				getOptionalString(args, "token_env_var"),
 			)), nil
 		},
@@ -693,7 +693,7 @@ func registerJobsTools(s *server.MCPServer) {
 				"run_id: Run ID of a failed multi-task job.\n"+
 				"rerun_tasks: Specific task keys to re-run. If omitted, re-runs all failed tasks.\n"+
 				"host: Databricks workspace URL. Overrides the default from env/config.\n"+
-				"profile: Name of a ~/.databrickscfg profile to use.\n"+
+				"config_profile: Name of a ~/.databrickscfg profile to use.\n"+
 				"token_env_var: Name of an environment variable containing the access token.",
 			mcp.WithInteger("run_id", mcp.Required(), mcp.Description("Run ID of a failed multi-task job.")),
 			mcp.WithArray("rerun_tasks", mcp.Description("Specific task keys to re-run. If omitted, re-runs all failed tasks.")),
@@ -704,7 +704,7 @@ func registerJobsTools(s *server.MCPServer) {
 				int64(getInt(args, "run_id", 0)),
 				getStringSlice(args, "rerun_tasks"),
 				getOptionalString(args, "host"),
-				getOptionalString(args, "profile"),
+				getOptionalString(args, "config_profile"),
 				getOptionalString(args, "token_env_var"),
 			)), nil
 		},
@@ -723,7 +723,7 @@ func registerClustersTools(s *server.MCPServer) {
 				"page_size: Number of clusters per page (default 20).\n"+
 				"page_token: Token from a previous response to fetch the next/previous page.\n"+
 				"host: Databricks workspace URL. Overrides the default from env/config.\n"+
-				"profile: Name of a ~/.databrickscfg profile to use.\n"+
+				"config_profile: Name of a ~/.databrickscfg profile to use.\n"+
 				"token_env_var: Name of an environment variable containing the access token.",
 			mcp.WithString("cluster_sources", mcp.Description("Comma-separated filter. Values: UI, API, JOB.")),
 			mcp.WithString("cluster_states", mcp.Description("Comma-separated filter. Values: RUNNING, TERMINATED, PENDING, etc.")),
@@ -740,7 +740,7 @@ func registerClustersTools(s *server.MCPServer) {
 				getInt(args, "page_size", 20),
 				getOptionalString(args, "page_token"),
 				getOptionalString(args, "host"),
-				getOptionalString(args, "profile"),
+				getOptionalString(args, "config_profile"),
 				getOptionalString(args, "token_env_var"),
 			)), nil
 		},
@@ -751,7 +751,7 @@ func registerClustersTools(s *server.MCPServer) {
 			"Get full configuration and state for a cluster.\n\n"+
 				"cluster_id: Cluster ID.\n"+
 				"host: Databricks workspace URL. Overrides the default from env/config.\n"+
-				"profile: Name of a ~/.databrickscfg profile to use.\n"+
+				"config_profile: Name of a ~/.databrickscfg profile to use.\n"+
 				"token_env_var: Name of an environment variable containing the access token.",
 			mcp.WithString("cluster_id", mcp.Required(), mcp.Description("Cluster ID.")),
 		)...),
@@ -760,7 +760,7 @@ func registerClustersTools(s *server.MCPServer) {
 			return textResult(clusters.GetCluster(ctx, 
 				getRequiredString(args, "cluster_id"),
 				getOptionalString(args, "host"),
-				getOptionalString(args, "profile"),
+				getOptionalString(args, "config_profile"),
 				getOptionalString(args, "token_env_var"),
 			)), nil
 		},
@@ -774,7 +774,7 @@ func registerClustersTools(s *server.MCPServer) {
 				"cluster_id: Cluster ID.\n"+
 				"max_results: Max events (default 25).\n"+
 				"host: Databricks workspace URL. Overrides the default from env/config.\n"+
-				"profile: Name of a ~/.databrickscfg profile to use.\n"+
+				"config_profile: Name of a ~/.databrickscfg profile to use.\n"+
 				"token_env_var: Name of an environment variable containing the access token.",
 			mcp.WithString("cluster_id", mcp.Required(), mcp.Description("Cluster ID.")),
 			mcp.WithInteger("max_results", mcp.Description("Max events (default 25).")),
@@ -785,7 +785,7 @@ func registerClustersTools(s *server.MCPServer) {
 				getRequiredString(args, "cluster_id"),
 				getInt(args, "max_results", 25),
 				getOptionalString(args, "host"),
-				getOptionalString(args, "profile"),
+				getOptionalString(args, "config_profile"),
 				getOptionalString(args, "token_env_var"),
 			)), nil
 		},
@@ -796,7 +796,7 @@ func registerClustersTools(s *server.MCPServer) {
 			"Start a terminated cluster. Does not wait for it to finish starting.\n\n"+
 				"cluster_id: Cluster ID.\n"+
 				"host: Databricks workspace URL. Overrides the default from env/config.\n"+
-				"profile: Name of a ~/.databrickscfg profile to use.\n"+
+				"config_profile: Name of a ~/.databrickscfg profile to use.\n"+
 				"token_env_var: Name of an environment variable containing the access token.",
 			mcp.WithString("cluster_id", mcp.Required(), mcp.Description("Cluster ID.")),
 		)...),
@@ -805,7 +805,7 @@ func registerClustersTools(s *server.MCPServer) {
 			return textResult(clusters.StartCluster(ctx, 
 				getRequiredString(args, "cluster_id"),
 				getOptionalString(args, "host"),
-				getOptionalString(args, "profile"),
+				getOptionalString(args, "config_profile"),
 				getOptionalString(args, "token_env_var"),
 			)), nil
 		},
@@ -816,7 +816,7 @@ func registerClustersTools(s *server.MCPServer) {
 			"Terminate a running cluster. This stops the cluster but does not delete it.\n\n"+
 				"cluster_id: Cluster ID.\n"+
 				"host: Databricks workspace URL. Overrides the default from env/config.\n"+
-				"profile: Name of a ~/.databrickscfg profile to use.\n"+
+				"config_profile: Name of a ~/.databrickscfg profile to use.\n"+
 				"token_env_var: Name of an environment variable containing the access token.",
 			mcp.WithString("cluster_id", mcp.Required(), mcp.Description("Cluster ID.")),
 		)...),
@@ -825,7 +825,7 @@ func registerClustersTools(s *server.MCPServer) {
 			return textResult(clusters.TerminateCluster(ctx, 
 				getRequiredString(args, "cluster_id"),
 				getOptionalString(args, "host"),
-				getOptionalString(args, "profile"),
+				getOptionalString(args, "config_profile"),
 				getOptionalString(args, "token_env_var"),
 			)), nil
 		},
@@ -842,7 +842,7 @@ func registerPipelinesTools(s *server.MCPServer) {
 				"name: Filter by pipeline name (substring match).\n"+
 				"max_results: Max results (default 25).\n"+
 				"host: Databricks workspace URL. Overrides the default from env/config.\n"+
-				"profile: Name of a ~/.databrickscfg profile to use.\n"+
+				"config_profile: Name of a ~/.databrickscfg profile to use.\n"+
 				"token_env_var: Name of an environment variable containing the access token.",
 			mcp.WithString("name", mcp.Description("Filter by pipeline name (substring match).")),
 			mcp.WithInteger("max_results", mcp.Description("Max results (default 25).")),
@@ -853,7 +853,7 @@ func registerPipelinesTools(s *server.MCPServer) {
 				getOptionalString(args, "name"),
 				getInt(args, "max_results", 25),
 				getOptionalString(args, "host"),
-				getOptionalString(args, "profile"),
+				getOptionalString(args, "config_profile"),
 				getOptionalString(args, "token_env_var"),
 			)), nil
 		},
@@ -865,7 +865,7 @@ func registerPipelinesTools(s *server.MCPServer) {
 				"Returns target catalog/schema, clusters, libraries, and notifications.\n\n"+
 				"pipeline_id: Pipeline ID.\n"+
 				"host: Databricks workspace URL. Overrides the default from env/config.\n"+
-				"profile: Name of a ~/.databrickscfg profile to use.\n"+
+				"config_profile: Name of a ~/.databrickscfg profile to use.\n"+
 				"token_env_var: Name of an environment variable containing the access token.",
 			mcp.WithString("pipeline_id", mcp.Required(), mcp.Description("Pipeline ID.")),
 		)...),
@@ -874,7 +874,7 @@ func registerPipelinesTools(s *server.MCPServer) {
 			return textResult(pipelines.GetPipeline(ctx, 
 				getRequiredString(args, "pipeline_id"),
 				getOptionalString(args, "host"),
-				getOptionalString(args, "profile"),
+				getOptionalString(args, "config_profile"),
 				getOptionalString(args, "token_env_var"),
 			)), nil
 		},
@@ -888,7 +888,7 @@ func registerPipelinesTools(s *server.MCPServer) {
 				"pipeline_id: Pipeline ID.\n"+
 				"max_results: Max events (default 25).\n"+
 				"host: Databricks workspace URL. Overrides the default from env/config.\n"+
-				"profile: Name of a ~/.databrickscfg profile to use.\n"+
+				"config_profile: Name of a ~/.databrickscfg profile to use.\n"+
 				"token_env_var: Name of an environment variable containing the access token.",
 			mcp.WithString("pipeline_id", mcp.Required(), mcp.Description("Pipeline ID.")),
 			mcp.WithInteger("max_results", mcp.Description("Max events (default 25).")),
@@ -899,7 +899,7 @@ func registerPipelinesTools(s *server.MCPServer) {
 				getRequiredString(args, "pipeline_id"),
 				getInt(args, "max_results", 25),
 				getOptionalString(args, "host"),
-				getOptionalString(args, "profile"),
+				getOptionalString(args, "config_profile"),
 				getOptionalString(args, "token_env_var"),
 			)), nil
 		},
@@ -911,7 +911,7 @@ func registerPipelinesTools(s *server.MCPServer) {
 				"pipeline_id: Pipeline ID.\n"+
 				"full_refresh: If true, full refresh instead of incremental (default false).\n"+
 				"host: Databricks workspace URL. Overrides the default from env/config.\n"+
-				"profile: Name of a ~/.databrickscfg profile to use.\n"+
+				"config_profile: Name of a ~/.databrickscfg profile to use.\n"+
 				"token_env_var: Name of an environment variable containing the access token.",
 			mcp.WithString("pipeline_id", mcp.Required(), mcp.Description("Pipeline ID.")),
 			mcp.WithBoolean("full_refresh", mcp.Description("If true, full refresh instead of incremental (default false).")),
@@ -922,7 +922,7 @@ func registerPipelinesTools(s *server.MCPServer) {
 				getRequiredString(args, "pipeline_id"),
 				getBool(args, "full_refresh", false),
 				getOptionalString(args, "host"),
-				getOptionalString(args, "profile"),
+				getOptionalString(args, "config_profile"),
 				getOptionalString(args, "token_env_var"),
 			)), nil
 		},
@@ -933,7 +933,7 @@ func registerPipelinesTools(s *server.MCPServer) {
 			"Stop a running pipeline.\n\n"+
 				"pipeline_id: Pipeline ID.\n"+
 				"host: Databricks workspace URL. Overrides the default from env/config.\n"+
-				"profile: Name of a ~/.databrickscfg profile to use.\n"+
+				"config_profile: Name of a ~/.databrickscfg profile to use.\n"+
 				"token_env_var: Name of an environment variable containing the access token.",
 			mcp.WithString("pipeline_id", mcp.Required(), mcp.Description("Pipeline ID.")),
 		)...),
@@ -942,7 +942,7 @@ func registerPipelinesTools(s *server.MCPServer) {
 			return textResult(pipelines.StopPipeline(ctx, 
 				getRequiredString(args, "pipeline_id"),
 				getOptionalString(args, "host"),
-				getOptionalString(args, "profile"),
+				getOptionalString(args, "config_profile"),
 				getOptionalString(args, "token_env_var"),
 			)), nil
 		},
@@ -959,7 +959,7 @@ func registerWorkspaceTools(s *server.MCPServer) {
 				"FILE, REPO), and language (for notebooks).\n\n"+
 				"path: Workspace path (e.g. /Users/user@example.com).\n"+
 				"host: Databricks workspace URL. Overrides the default from env/config.\n"+
-				"profile: Name of a ~/.databrickscfg profile to use.\n"+
+				"config_profile: Name of a ~/.databrickscfg profile to use.\n"+
 				"token_env_var: Name of an environment variable containing the access token.",
 			mcp.WithString("path", mcp.Required(), mcp.Description("Workspace path (e.g. /Users/user@example.com).")),
 		)...),
@@ -968,7 +968,7 @@ func registerWorkspaceTools(s *server.MCPServer) {
 			return textResult(workspace.ListWorkspace(ctx, 
 				getRequiredString(args, "path"),
 				getOptionalString(args, "host"),
-				getOptionalString(args, "profile"),
+				getOptionalString(args, "config_profile"),
 				getOptionalString(args, "token_env_var"),
 			)), nil
 		},
@@ -982,7 +982,7 @@ func registerWorkspaceTools(s *server.MCPServer) {
 				"path: Notebook path in workspace.\n"+
 				"format: Export format: SOURCE (default), HTML, JUPYTER, DBC.\n"+
 				"host: Databricks workspace URL. Overrides the default from env/config.\n"+
-				"profile: Name of a ~/.databrickscfg profile to use.\n"+
+				"config_profile: Name of a ~/.databrickscfg profile to use.\n"+
 				"token_env_var: Name of an environment variable containing the access token.",
 			mcp.WithString("path", mcp.Required(), mcp.Description("Notebook path in workspace.")),
 			mcp.WithString("format", mcp.Description("Export format: SOURCE (default), HTML, JUPYTER, DBC.")),
@@ -997,7 +997,7 @@ func registerWorkspaceTools(s *server.MCPServer) {
 				getRequiredString(args, "path"),
 				format,
 				getOptionalString(args, "host"),
-				getOptionalString(args, "profile"),
+				getOptionalString(args, "config_profile"),
 				getOptionalString(args, "token_env_var"),
 			)), nil
 		},
@@ -1014,7 +1014,7 @@ func registerFilesTools(s *server.MCPServer) {
 				"Returns a JSON array of entries with path, name, size, and directory flag.\n\n"+
 				"path: DBFS path (dbfs:/...) or Volumes path (/Volumes/...).\n"+
 				"host: Databricks workspace URL. Overrides the default from env/config.\n"+
-				"profile: Name of a ~/.databrickscfg profile to use.\n"+
+				"config_profile: Name of a ~/.databrickscfg profile to use.\n"+
 				"token_env_var: Name of an environment variable containing the access token.",
 			mcp.WithString("path", mcp.Required(), mcp.Description("DBFS path (dbfs:/...) or Volumes path (/Volumes/...).")),
 		)...),
@@ -1023,7 +1023,7 @@ func registerFilesTools(s *server.MCPServer) {
 			return textResult(files.ListFiles(ctx, 
 				getRequiredString(args, "path"),
 				getOptionalString(args, "host"),
-				getOptionalString(args, "profile"),
+				getOptionalString(args, "config_profile"),
 				getOptionalString(args, "token_env_var"),
 			)), nil
 		},
@@ -1037,7 +1037,7 @@ func registerFilesTools(s *server.MCPServer) {
 				"path: Path to the file.\n"+
 				"max_bytes: Max bytes to read (default 1MB, max 10MB).\n"+
 				"host: Databricks workspace URL. Overrides the default from env/config.\n"+
-				"profile: Name of a ~/.databrickscfg profile to use.\n"+
+				"config_profile: Name of a ~/.databrickscfg profile to use.\n"+
 				"token_env_var: Name of an environment variable containing the access token.",
 			mcp.WithString("path", mcp.Required(), mcp.Description("Path to the file.")),
 			mcp.WithInteger("max_bytes", mcp.Description("Max bytes to read (default 1MB, max 10MB).")),
@@ -1048,7 +1048,7 @@ func registerFilesTools(s *server.MCPServer) {
 				getRequiredString(args, "path"),
 				getInt(args, "max_bytes", 1000000),
 				getOptionalString(args, "host"),
-				getOptionalString(args, "profile"),
+				getOptionalString(args, "config_profile"),
 				getOptionalString(args, "token_env_var"),
 			)), nil
 		},
@@ -1063,14 +1063,14 @@ func registerSecretsTools(s *server.MCPServer) {
 			"List all secret scopes in the workspace.\n\n"+
 				"Returns a sorted JSON array of scope names.\n\n"+
 				"host: Databricks workspace URL. Overrides the default from env/config.\n"+
-				"profile: Name of a ~/.databrickscfg profile to use.\n"+
+				"config_profile: Name of a ~/.databrickscfg profile to use.\n"+
 				"token_env_var: Name of an environment variable containing the access token.",
 		)...),
 		func(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 			args := req.GetArguments()
 			return textResult(secrets.ListSecretScopes(ctx, 
 				getOptionalString(args, "host"),
-				getOptionalString(args, "profile"),
+				getOptionalString(args, "config_profile"),
 				getOptionalString(args, "token_env_var"),
 			)), nil
 		},
@@ -1081,7 +1081,7 @@ func registerSecretsTools(s *server.MCPServer) {
 			"List secret key names in a scope. Values are never returned.\n\n"+
 				"scope: Secret scope name.\n"+
 				"host: Databricks workspace URL. Overrides the default from env/config.\n"+
-				"profile: Name of a ~/.databrickscfg profile to use.\n"+
+				"config_profile: Name of a ~/.databrickscfg profile to use.\n"+
 				"token_env_var: Name of an environment variable containing the access token.",
 			mcp.WithString("scope", mcp.Required(), mcp.Description("Secret scope name.")),
 		)...),
@@ -1090,7 +1090,7 @@ func registerSecretsTools(s *server.MCPServer) {
 			return textResult(secrets.ListSecrets(ctx, 
 				getRequiredString(args, "scope"),
 				getOptionalString(args, "host"),
-				getOptionalString(args, "profile"),
+				getOptionalString(args, "config_profile"),
 				getOptionalString(args, "token_env_var"),
 			)), nil
 		},
@@ -1107,7 +1107,7 @@ func registerPermissionsTools(s *server.MCPServer) {
 				"securable_type: One of: CATALOG, SCHEMA, TABLE, VOLUME, FUNCTION.\n"+
 				"full_name: Full name of the securable.\n"+
 				"host: Databricks workspace URL. Overrides the default from env/config.\n"+
-				"profile: Name of a ~/.databrickscfg profile to use.\n"+
+				"config_profile: Name of a ~/.databrickscfg profile to use.\n"+
 				"token_env_var: Name of an environment variable containing the access token.",
 			mcp.WithString("securable_type", mcp.Required(), mcp.Description("One of: CATALOG, SCHEMA, TABLE, VOLUME, FUNCTION.")),
 			mcp.WithString("full_name", mcp.Required(), mcp.Description("Full name of the securable.")),
@@ -1118,7 +1118,7 @@ func registerPermissionsTools(s *server.MCPServer) {
 				getRequiredString(args, "securable_type"),
 				getRequiredString(args, "full_name"),
 				getOptionalString(args, "host"),
-				getOptionalString(args, "profile"),
+				getOptionalString(args, "config_profile"),
 				getOptionalString(args, "token_env_var"),
 			)), nil
 		},
@@ -1131,7 +1131,7 @@ func registerPermissionsTools(s *server.MCPServer) {
 				"object_type: One of: clusters, jobs, pipelines, sql/warehouses, etc.\n"+
 				"object_id: Object ID.\n"+
 				"host: Databricks workspace URL. Overrides the default from env/config.\n"+
-				"profile: Name of a ~/.databrickscfg profile to use.\n"+
+				"config_profile: Name of a ~/.databrickscfg profile to use.\n"+
 				"token_env_var: Name of an environment variable containing the access token.",
 			mcp.WithString("object_type", mcp.Required(), mcp.Description("One of: clusters, jobs, pipelines, sql/warehouses, etc.")),
 			mcp.WithString("object_id", mcp.Required(), mcp.Description("Object ID.")),
@@ -1142,7 +1142,7 @@ func registerPermissionsTools(s *server.MCPServer) {
 				getRequiredString(args, "object_type"),
 				getRequiredString(args, "object_id"),
 				getOptionalString(args, "host"),
-				getOptionalString(args, "profile"),
+				getOptionalString(args, "config_profile"),
 				getOptionalString(args, "token_env_var"),
 			)), nil
 		},
